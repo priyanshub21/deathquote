@@ -1,0 +1,51 @@
+document.getElementById('uploadForm').addEventListener('submit', function (event) {
+  event.preventDefault();
+
+  var fileInput = document.getElementById('mediaFile');
+  var files = fileInput.files;
+
+  var formData = new FormData();
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    formData.append('mediaFiles', file);
+  }
+
+  fetch('/upload', {
+    method: 'POST',
+    body: formData
+  })
+  .then(function (response) {
+    return response.json();
+  })
+  .then(function (data) {
+    // Handle the response from the server
+    console.log(data);
+    displayMedia(data);
+  })
+  .catch(function (error) {
+    console.error('Error:', error);
+  });
+});
+
+function displayMedia(mediaData) {
+  var mediaGallery = document.getElementById('mediaGallery');
+  mediaGallery.innerHTML = '';
+
+  mediaData.forEach(function (media) {
+    var mediaElement;
+    if (media.type.startsWith('image/')) {
+      mediaElement = document.createElement('img');
+      mediaElement.src = media.path;
+      mediaElement.alt = media.filename;
+    } else if (media.type.startsWith('video/')) {
+      mediaElement = document.createElement('video');
+      mediaElement.src = media.path;
+      mediaElement.controls = true;
+      mediaElement.autoplay = true;
+    }
+
+    if (mediaElement) {
+      mediaGallery.appendChild(mediaElement);
+    }
+  });
+}
